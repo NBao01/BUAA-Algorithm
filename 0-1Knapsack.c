@@ -49,4 +49,5 @@ int main() {
             printf("Select Good_%d not\n", i);
         }
     }
+    return 0;
 }
