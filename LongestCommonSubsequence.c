@@ -2,14 +2,14 @@
 // Created by NBao on 2021/01/28.
 //
 // Input:
-//     Sequence X = <x_1, x_2, ..., x_n> and Sequence Y = <y_1, y_2, ..., y_n>
+//     Sequence X = <x_1, x_2, ..., x_n> and Sequence Y = <y_1, y_2, ..., y_m>
 // Output:
 //     A Common Subsequence Z = <z_1, z_2, ..., z_l>,
 //     let max|Z|,
 //     s.t. <z_1, z_2, ..., z_l>
 //         = <x_{i_1}, x_{i_2}, ..., x_{i_l},>
 //         = <y_{j_1}, y_{j_2}, ..., y_{j_l},>
-//     (1 <= i_1 < i_2 < ... < i_l <= n; 1 <= j_1 < j_2 < ... < j_l <= n;)
+//     (1 <= i_1 < i_2 < ... < i_l <= n; 1 <= j_1 < j_2 < ... < j_l <= m;)
 //
 
 #include <stdio.h>
