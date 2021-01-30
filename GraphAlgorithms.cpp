@@ -6,6 +6,7 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <set>
 
 #define WHITE 0
 #define GRAY 1
@@ -25,6 +26,7 @@ private:
         int finish;
         int inDegree;
         std::vector<Vertex*> adj;
+        std::vector<int> weights;
         friend class Graph;
     public:
         explicit Vertex(int id) {
@@ -42,14 +44,18 @@ private:
     private:
         Vertex* from;
         Vertex* to;
+        int weight;
         friend class Graph;
     public:
-        Edge(Vertex* v1, Vertex* v2, bool directed) {
-            from = v1;
-            to = v2;
-            v1->adj.push_back(v2);
+        Edge(Vertex* v1, Vertex* v2, bool directed, int weight = 1) {
+            this->from = v1;
+            this->to = v2;
+            this->weight = weight;
+            from->adj.push_back(to);
+            from->weights.push_back(weight);
             if (!directed) {
-                v2->adj.push_back(v1);
+                to->adj.push_back(from);
+                to->weights.push_back(weight);
             }
         }
     };
@@ -154,6 +160,12 @@ public:
         this->edges.push_back(new Edge(V1, V2, directed));
     }
 
+    void addEdge(int v1, int v2, int weight) {
+        Vertex* V1 = getVertex(v1);
+        Vertex* V2 = getVertex(v2);
+        this->edges.push_back(new Edge(V1, V2, directed, weight));
+    }
+
     void BFS(int s) {
         std::queue<Vertex*> Q;
         initialize_BFS();
@@ -248,5 +260,26 @@ public:
         return Components;
     }
 
-
+    void MST_Prim_Priority_Queue() {
+        std::priority_queue<Vertex*> Q;
+        std::set<int> visited;
+        initialize_BFS();
+        vertexes.at(0)->dist = 0;
+        Q.push(vertexes.at(0));
+        while (!Q.empty()) {
+            Vertex *v = Q.top();
+            Q.pop();
+            if (visited.count(v->id) == 0) {
+                visited.insert(v->id);
+                for (int i = 0; i < v->adj.size(); i++) {
+                    if (v->adj.at(i)->color == WHITE && v->weights.at(i) < v->adj.at(i)->dist) {
+                        v->adj.at(i)->dist = v->weights.at(i);
+                        v->adj.at(i)->pred = v;
+                        auto *copy = new Vertex(*v->adj.at(i));
+                        Q.push(copy);
+                    }
+                }
+            }
+        }
+    }
 };
