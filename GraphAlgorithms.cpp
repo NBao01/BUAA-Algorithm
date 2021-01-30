@@ -327,7 +327,7 @@ public:
         return T;
     }
 
-    void Single_Source_Shortest_Path_Dijkstra_Priority_Queue() {
+    void Single_Source_Shortest_Path_Dijkstra_Unionset() {
         std::priority_queue<Vertex*> Q;
         std::set<int> visited;
         initialize_BFS();
