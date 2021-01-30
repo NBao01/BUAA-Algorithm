@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 
 #define WHITE 0
 #define GRAY 1
@@ -22,6 +23,7 @@ private:
         int dist;
         int discover;
         int finish;
+        int inDegree;
         std::vector<Vertex*> adj;
         friend class Graph;
     public:
@@ -32,6 +34,7 @@ private:
             this->dist = 0;
             this->discover = 0;
             this->finish = 0;
+            this->inDegree = 0;
         }
     };
 
@@ -73,17 +76,21 @@ private:
         }
     }
 
-    void DFS_Visit(Vertex* v) {
+    std::vector<Vertex*>* DFS_Visit(Vertex* v) {
+        auto* L = new std::vector<Vertex*>();
         v->color = GRAY;
         v->discover = ++time;
         for (auto & w : v->adj) {
             if (w->color == WHITE) {
                 w->pred = v;
-                DFS_Visit(w);
+                std::vector<Vertex*>* l = DFS_Visit(w);
+                L->insert(L->end(), l->begin(), l->end());
             }
         }
         v->color = BLACK;
+        L->push_back(v);
         v->finish = ++time;
+        return L;
     }
 
     bool DFS_Visit_Judge_Cycle(Vertex* v) {
@@ -103,6 +110,12 @@ private:
         v->color = BLACK;
         v->discover = ++time;
         return false;
+    }
+
+    void initialize_Topological_Sort_BFS() {
+        for (auto & vertex : vertexes) {
+            vertex->inDegree = vertex->adj.size();
+        }
     }
 
 public:
@@ -152,13 +165,16 @@ public:
         }
     }
 
-    void DFS() {
+    std::vector<Vertex*>* DFS() {
         initialize_DFS();
+        auto* L = new std::vector<Vertex*>();
         for (auto & v : vertexes) {
             if (v->color == WHITE) {
-                DFS_Visit(v);
+                std::vector<Vertex*>* l = DFS_Visit(v);
+                L->insert(L->end(), l->begin(), l->end());
             }
         }
+        return L;
     }
 
     bool DFS_Judge_Cycle() {
@@ -171,5 +187,34 @@ public:
             }
         }
         return false;
+    }
+
+   std::vector<Vertex*>* Topological_Sort_BFS() {
+        initialize_Topological_Sort_BFS();
+        std::queue<Vertex*> Q;
+        auto* P = new std::vector<Vertex*>();
+        for (auto & v : vertexes) {
+            if (v->inDegree == 0) {
+                Q.push(v);
+            }
+        }
+        while (!Q.empty()) {
+            Vertex* u = Q.front();
+            Q.pop();
+            P->push_back(u);
+            for (auto & v : u->adj) {
+                v->inDegree--;
+                if (v->inDegree == 0) {
+                    Q.push(v);
+                }
+            }
+        }
+        return P;
+    }
+
+    std::vector<Vertex*>* Topological_Sort_DFS() {
+        std::vector<Vertex*>* L = DFS();
+        reverse(L->begin(), L->end());
+        return L;
     }
 };
