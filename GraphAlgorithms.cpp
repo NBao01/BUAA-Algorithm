@@ -25,6 +25,8 @@ private:
         int discover;
         int finish;
         int inDegree;
+        Vertex* unionSetParent;
+        int unionSetHeight;
         std::vector<Vertex*> adj;
         std::vector<int> weights;
         friend class Graph;
@@ -37,6 +39,8 @@ private:
             this->discover = 0;
             this->finish = 0;
             this->inDegree = 0;
+            this->unionSetParent = this;
+            this->unionSetHeight = 0;
         }
     };
 
@@ -133,6 +137,34 @@ private:
             R->addEdge(edge->to->id, edge->from->id);
         }
         return R;
+    }
+
+    void initialize_MST_Kruskal_Unionset() {
+        for (auto & vertex : vertexes) {
+            vertex->unionSetParent = vertex;
+            vertex->unionSetHeight = 1;
+        }
+    }
+
+    static Vertex* MST_Kruskal_Unionset_Findset(Vertex* v) {
+        while (v->unionSetParent != v) {
+            v = v->unionSetParent;
+        }
+        return v;
+    }
+
+    static void MST_Kruskal_Unionset_Unionset(Vertex* x, Vertex* y) {
+        Vertex* a = MST_Kruskal_Unionset_Findset(x);
+        Vertex* b = MST_Kruskal_Unionset_Findset(y);
+        if (a->unionSetHeight <= b->unionSetHeight) {
+            if (a->unionSetHeight == b->unionSetHeight) {
+                b->unionSetHeight++;
+            }
+            a->unionSetParent = b;
+        }
+        else {
+            b->unionSetParent = a;
+        }
     }
 
 public:
@@ -272,7 +304,42 @@ public:
             if (visited.count(v->id) == 0) {
                 visited.insert(v->id);
                 for (int i = 0; i < v->adj.size(); i++) {
-                    if (v->adj.at(i)->color == WHITE && v->weights.at(i) < v->adj.at(i)->dist) {
+                    if (visited.count(v->adj.at(i)->id) == 0 && v->weights.at(i) < v->adj.at(i)->dist) {
+                        v->adj.at(i)->dist = v->weights.at(i);
+                        v->adj.at(i)->pred = v;
+                        auto *copy = new Vertex(*v->adj.at(i));
+                        Q.push(copy);
+                    }
+                }
+            }
+        }
+    }
+
+    std::vector<Edge*>* MST_Kruskal() {
+        auto* T = new std::vector<Edge*>();
+        initialize_MST_Kruskal_Unionset();
+        for (auto & edge : edges) {
+            if (MST_Kruskal_Unionset_Findset(edge->from) != MST_Kruskal_Unionset_Findset(edge->to)) {
+                T->push_back(edge);
+                MST_Kruskal_Unionset_Unionset(edge->from, edge->to);
+            }
+        }
+        return T;
+    }
+
+    void Single_Source_Shortest_Path_Dijkstra_Priority_Queue() {
+        std::priority_queue<Vertex*> Q;
+        std::set<int> visited;
+        initialize_BFS();
+        vertexes.at(0)->dist = 0;
+        Q.push(vertexes.at(0));
+        while (!Q.empty()) {
+            Vertex *v = Q.top();
+            Q.pop();
+            if (visited.count(v->id) == 0) {
+                visited.insert(v->id);
+                for (int i = 0; i < v->adj.size(); i++) {
+                    if (v->dist + v->weights.at(i) < v->adj.at(i)->dist) {
                         v->adj.at(i)->dist = v->weights.at(i);
                         v->adj.at(i)->pred = v;
                         auto *copy = new Vertex(*v->adj.at(i));
