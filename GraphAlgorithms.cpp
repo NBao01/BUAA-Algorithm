@@ -118,6 +118,17 @@ private:
         }
     }
 
+    Graph* reverse() {
+        auto* R = new Graph(directed);
+        for (auto & vertex : vertexes) {
+            R->addVertex(vertex->id);
+        }
+        for (auto & edge : edges) {
+            R->addEdge(edge->to->id, edge->from->id);
+        }
+        return R;
+    }
+
 public:
     explicit Graph(bool directed) {
         this->directed = directed;
@@ -144,7 +155,7 @@ public:
     }
 
     void BFS(int s) {
-        std::queue<Vertex *> Q;
+        std::queue<Vertex*> Q;
         initialize_BFS();
         Vertex* S = getVertex(s);
         S->color = GRAY;
@@ -214,7 +225,28 @@ public:
 
     std::vector<Vertex*>* Topological_Sort_DFS() {
         std::vector<Vertex*>* L = DFS();
-        reverse(L->begin(), L->end());
+        std::reverse(L->begin(), L->end());
         return L;
     }
+
+    std::vector<std::vector<Vertex*>*>* Strongly_Connected_Component() {
+        auto* Components = new std::vector<std::vector<Vertex*>*>();
+        Graph* R = this->reverse();
+        std::vector<Vertex*>* L = R->DFS();
+
+        for (auto & v : vertexes) {
+            v->color = WHITE;
+        }
+
+        for (int i = (int)L->size() - 1; i >= 0; i--) {
+            Vertex* u = L->at(i);
+            if (u->color == WHITE) {
+                std::vector<Vertex*>* L_SCC = DFS_Visit(u);
+                Components->push_back(L_SCC);
+            }
+        }
+        return Components;
+    }
+
+
 };
