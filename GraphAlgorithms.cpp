@@ -70,6 +70,14 @@ private:
 
     int time;
 
+    class cmp {
+    public:
+        bool operator() (const Vertex* a,const Vertex* b)
+        {
+            return a->dist > b->dist;
+        }
+    };
+
     void initialize_BFS() {
         for (auto & vertex : vertexes) {
             vertex->color = WHITE;
@@ -293,7 +301,7 @@ public:
     }
 
     void MST_Prim_Priority_Queue() {
-        std::priority_queue<Vertex*> Q;
+        std::priority_queue<Vertex*, std::vector<Vertex*>, cmp> Q;
         std::set<int> visited;
         initialize_BFS();
         vertexes.at(0)->dist = 0;
@@ -328,7 +336,7 @@ public:
     }
 
     void Single_Source_Shortest_Path_Dijkstra_Unionset() {
-        std::priority_queue<Vertex*> Q;
+        std::priority_queue<Vertex*, std::vector<Vertex*>, cmp> Q;
         std::set<int> visited;
         initialize_BFS();
         vertexes.at(0)->dist = 0;
@@ -346,6 +354,25 @@ public:
                         Q.push(copy);
                     }
                 }
+            }
+        }
+    }
+
+    void Single_Source_Shortest_Path_Bellman_Ford() {
+        initialize_BFS();
+        vertexes.at(0)->dist = 0;
+        for (int i = 0; i < vertexes.size(); i++) {
+            for (auto & edge : edges) {
+                if (edge->from->dist + edge->weight < edge->to->dist) {
+                    edge->to->dist = edge->from->dist + edge->weight;
+                    edge->to->pred = edge->from;
+                }
+            }
+        }
+        for (auto & edge : edges) {
+            if (edge->from->dist + edge->weight < edge->to->dist) {
+                printf("Exist Negative Loop\n");
+                return;
             }
         }
     }
